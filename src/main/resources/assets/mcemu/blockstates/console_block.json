@@ -1,0 +1,5 @@
+{
+    "variants": {
+        "": {"model": "mcemu:block/console_block"}
+    }
+}
