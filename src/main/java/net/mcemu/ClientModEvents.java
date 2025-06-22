@@ -17,6 +17,7 @@ import net.mcemu.client.renderer.TelevisionRenderer;
 @Mod.EventBusSubscriber(modid = MCEmuMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientModEvents {
 
+
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
@@ -37,6 +38,8 @@ public class ClientModEvents {
             }
         }
     }
+
+
 
 
 

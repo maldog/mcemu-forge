@@ -46,22 +46,6 @@ public class TelevisionRenderer implements BlockEntityRenderer<TelevisionEntity>
         //VertexConsumer builder = bufferSource.getBuffer(RenderType.entityTranslucent(STATIC_SCREEN));
         ResourceLocation frameTex = entity.getNesTexture();
         VertexConsumer builder = bufferSource.getBuffer(RenderType.entityTranslucent(frameTex));
-        //Option A for washed out colors
-        //VertexConsumer builder = bufferSource.getBuffer(RenderType.text(frameTex));
-        //Option B
-        //VertexConsumer builder = bufferSource.getBuffer(RenderType.entitySolid(frameTex));
-        //VertexConsumer builder = bufferSource.getBuffer(RenderType.text(entity.getNesTexture()));
-
-        /*
-        float x1 = 2f / 16f, x2 = 14f / 16f;
-        float y1 = 4f / 16f, y2 = 12f / 16f;
-        float z = 0.001f; // Near the front face
-
-        builder.vertex(poseStack.last().pose(), x1, y1, z).color(255, 255, 255, 255).uv(0, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(combinedLight).normal(0, 0, 1).endVertex();
-        builder.vertex(poseStack.last().pose(), x2, y1, z).color(255, 255, 255, 255).uv(1, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(combinedLight).normal(0, 0, 1).endVertex();
-        builder.vertex(poseStack.last().pose(), x2, y2, z).color(255, 255, 255, 255).uv(1, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(combinedLight).normal(0, 0, 1).endVertex();
-        builder.vertex(poseStack.last().pose(), x1, y2, z).color(255, 255, 255, 255).uv(0, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(combinedLight).normal(0, 0, 1).endVertex();
-        */
 
         // inside render() method
         Pose pose = poseStack.last();

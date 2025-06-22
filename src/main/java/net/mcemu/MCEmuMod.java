@@ -74,7 +74,7 @@ public class MCEmuMod {
     }
 
 
-
+/*
     @Mod.EventBusSubscriber(modid = MCEmuMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public class ClientModEvents {
 
@@ -94,6 +94,8 @@ public class MCEmuMod {
             });
         }
     }
+    */
+
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
