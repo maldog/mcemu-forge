@@ -1,7 +1,7 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "mcemu:items/cart1"
+    "layer0": "mcemu:item/cart1"
   },
   "overrides": [
     { "predicate": { "custom_model_data": 1 }, "model": "mcemu:item/cart1" },
