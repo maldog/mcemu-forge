@@ -11,6 +11,18 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+
+import net.minecraft.client.renderer.GameRenderer;
+
 public class TelevisionEntityRenderer implements BlockEntityRenderer<TelevisionEntity> {
 
     public TelevisionEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -20,6 +32,12 @@ public class TelevisionEntityRenderer implements BlockEntityRenderer<TelevisionE
     @Override
     public void render(TelevisionEntity entity, float partialTicks, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+
+        // 🔹 Start emulator if not running
+        if (entity.emulator == null) {
+            java.io.File rom = new java.io.File("config/mcemu/roms/smb.nes"); // TODO: replace with actual cartridge logic
+            entity.startEmulator(rom);
+        }
 
         Direction dir = entity.getBlockState().getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING);
         float rotationY = switch (dir) {
@@ -35,7 +53,34 @@ public class TelevisionEntityRenderer implements BlockEntityRenderer<TelevisionE
         poseStack.translate(-0.5, -0.5, -0.5);
 
         // TODO: Draw NES framebuffer or static image
-        // For now, this is just a placeholder
+        ResourceLocation screenTex = entity.getNesTexture();
+        if (screenTex != null) {
+            RenderSystem.setShaderTexture(0, screenTex);
+            //RenderSystem.setShader(RenderSystem::getPositionTexShader);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+
+            float pixelW = 1.0F / 256.0F;
+            float pixelH = 1.0F / 240.0F;
+
+            float x1 = 0.1875f; // inset the screen within the block face
+            float x2 = 0.8125f;
+            float y1 = 0.125f;
+            float y2 = 0.75f;
+            float z = 0.001f; // slight depth to prevent Z-fighting
+
+            Tesselator tess = Tesselator.getInstance();
+            BufferBuilder buffer = tess.getBuilder();
+            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+
+            buffer.vertex(poseStack.last().pose(), x1, y2, z).uv(0, 1).endVertex();
+            buffer.vertex(poseStack.last().pose(), x2, y2, z).uv(1, 1).endVertex();
+            buffer.vertex(poseStack.last().pose(), x2, y1, z).uv(1, 0).endVertex();
+            buffer.vertex(poseStack.last().pose(), x1, y1, z).uv(0, 0).endVertex();
+
+            tess.end();
+        }
+
         poseStack.popPose();
     }
+
 }

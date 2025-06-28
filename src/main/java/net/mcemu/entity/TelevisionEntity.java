@@ -18,6 +18,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import java.awt.image.BufferedImage;
+
+import java.io.File;
+
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
@@ -26,7 +35,7 @@ public class TelevisionEntity extends BlockEntity {
     private Direction facing;
 
     @OnlyIn(Dist.CLIENT)
-    private MCEmu emulator;
+    public MCEmu emulator;
 
     public TelevisionEntity(BlockPos pos, BlockState state) {
         super(ModRegistry.TELEVISION_BLOCK_ENTITY.get(), pos, state);
@@ -48,6 +57,53 @@ public class TelevisionEntity extends BlockEntity {
     }
 
     @OnlyIn(Dist.CLIENT)
+    private ScheduledExecutorService nesThread;
+
+    @OnlyIn(Dist.CLIENT)
+    private Future<?> nesTask;
+
+    @OnlyIn(Dist.CLIENT)
+    public void startEmulator(File romFile) {
+        if (emulator != null) return;
+
+        emulator = new MCEmu();
+        emulator.reset(romFile.toPath());
+
+        nesThread = Executors.newSingleThreadScheduledExecutor();
+        nesTask = nesThread.scheduleAtFixedRate(() -> {
+            try {
+                BufferedImage image = emulator.getImage();
+                int[] framebuffer = image.getRGB(0, 0, 256, 240, null, 0, 256);
+
+                Minecraft.getInstance().execute(() -> updateFrame(framebuffer));
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 0, 16, TimeUnit.MILLISECONDS);  // ~60 FPS
+    }
+
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+
+        if (nesTask != null) {
+            nesTask.cancel(true);
+            nesTask = null;
+        }
+
+        if (nesThread != null) {
+            nesThread.shutdownNow();
+            nesThread = null;
+        }
+
+        if (emulator != null) {
+            emulator.stop();
+            emulator = null;
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
     private DynamicTexture nesTexture;
     @OnlyIn(Dist.CLIENT)
     private ResourceLocation nesTextureId;
@@ -64,15 +120,6 @@ public class TelevisionEntity extends BlockEntity {
         }
 
         return nesTextureId;
-    }
-
-    @Override
-    public void setRemoved() {
-        super.setRemoved();
-        if (emulator != null) {
-            emulator.stop(); // Stop the NES
-            emulator = null;
-        }
     }
 
 
