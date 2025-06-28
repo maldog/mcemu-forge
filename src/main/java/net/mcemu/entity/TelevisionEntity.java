@@ -66,17 +66,39 @@ public class TelevisionEntity extends BlockEntity {
         return nesTextureId;
     }
 
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+        if (emulator != null) {
+            emulator.stop(); // Stop the NES
+            emulator = null;
+        }
+    }
+
 
     @OnlyIn(Dist.CLIENT)
     public void updateFrame(int[] argbPixels) {
         //System.out.println("Updating NES frame at " + this.getBlockPos());
         if (nesTexture == null) return;
         NativeImage img = nesTexture.getPixels();
+//        for (int y = 0; y < 240; y++) {
+//            for (int x = 0; x < 256; x++) {
+//                img.setPixelRGBA(x, y, argbPixels[y * 256 + x]);
+//            }
+//        }
         for (int y = 0; y < 240; y++) {
             for (int x = 0; x < 256; x++) {
-                img.setPixelRGBA(x, y, argbPixels[y * 256 + x]);
+                int argb = argbPixels[y * 256 + x];
+
+                int r = (argb >> 16) & 0xFF;
+                int g = (argb >> 8) & 0xFF;
+                int b = argb & 0xFF;
+
+                int opaque = (0xFF << 24) | (r << 16) | (g << 8) | b;
+                img.setPixelRGBA(x, y, opaque);
             }
         }
+
         nesTexture.upload();
     }
 }

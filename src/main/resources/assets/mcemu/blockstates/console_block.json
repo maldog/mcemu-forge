@@ -1,5 +1,8 @@
 {
     "variants": {
-        "": {"model": "mcemu:block/console_block"}
+        "facing=north": { "model": "mcemu:block/console_block", "y": 180 },
+        "facing=south": { "model": "mcemu:block/console_block", "y": 0 },
+        "facing=west":  { "model": "mcemu:block/console_block", "y": 90 },
+        "facing=east":  { "model": "mcemu:block/console_block", "y": 270 }
     }
 }

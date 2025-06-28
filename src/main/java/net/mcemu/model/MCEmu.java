@@ -33,7 +33,9 @@ public class MCEmu {
 
     public void start(Path path) {
         if (load(path)) {
-            f = executorService.scheduleAtFixedRate(nes::execFrame, 0, (int)(1000f / 60), TimeUnit.MILLISECONDS);
+            //sort out a speed issue after resume from sleep.
+            //f = executorService.scheduleAtFixedRate(nes::execFrame, 0, (int)(1000f / 60), TimeUnit.MILLISECONDS);
+            f = executorService.scheduleWithFixedDelay(nes::execFrame, 0, 16, TimeUnit.MILLISECONDS);
         }
     }
 

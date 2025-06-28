@@ -45,7 +45,10 @@ public class TelevisionRenderer implements BlockEntityRenderer<TelevisionEntity>
         // Screen quad (flat square inside the TV)
         //VertexConsumer builder = bufferSource.getBuffer(RenderType.entityTranslucent(STATIC_SCREEN));
         ResourceLocation frameTex = entity.getNesTexture();
-        VertexConsumer builder = bufferSource.getBuffer(RenderType.entityTranslucent(frameTex));
+        //VertexConsumer builder = bufferSource.getBuffer(RenderType.entityTranslucent(frameTex));
+        //VertexConsumer builder = bufferSource.getBuffer(RenderType.entitySolid(frameTex));
+        //VertexConsumer builder = bufferSource.getBuffer(RenderType.gui());
+        VertexConsumer builder = bufferSource.getBuffer(RenderType.text(frameTex));
 
         // inside render() method
         Pose pose = poseStack.last();

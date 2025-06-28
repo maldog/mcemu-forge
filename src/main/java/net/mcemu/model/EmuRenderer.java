@@ -42,7 +42,9 @@ public class EmuRenderer implements Renderer {
     //private BufferedImage image = new BufferedImage(SCREEN_WIDTH,
     //        SCREEN_HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
 
-    private BufferedImage image = new BufferedImage(SCREEN_WIDTH, SCREEN_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+    //private BufferedImage image = new BufferedImage(SCREEN_WIDTH, SCREEN_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+
+    private BufferedImage image = new BufferedImage(SCREEN_WIDTH, SCREEN_HEIGHT, BufferedImage.TYPE_INT_RGB);
 
 
     public BufferedImage getImage() {
