@@ -9,6 +9,8 @@ NES emulator in Minecraft!
 ![2022-05-02_19 53 53](https://user-images.githubusercontent.com/493908/166223486-5f2ee0b9-7c17-422d-953b-747ba1c6beb4.png)
 
 ## Status
+Update v1.4 - 2025-06-29
+* Save State Support implemented. It may have issues.
 
 Update v1.3 - 2025-06-22
 * Update for Forge Minecraft 1.20.1
@@ -45,7 +47,6 @@ Updates for 1.19.4
 
 ## Things that need doing
  * Sound. There is no sound.
- * Saving. There is no save support whatsoever. I think...
  * Upgrading to a newer version of Minecraft.
 
 Special thanks for original authors Delta2Force for creating this initially, and umjammer for the update to 1.19.4.

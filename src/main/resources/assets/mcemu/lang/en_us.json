@@ -19,6 +19,8 @@
   "key.mcemu.p2_b": "Player 2 B",
   "key.mcemu.p2_start": "Player 2 Start",
   "key.mcemu.p2_select": "Player 2 Select",
+  "key.mcemu.save_state": "State Save",
+  "key.mcemu.load_state": "State Load",
   "item.console.name": "Nintendo Entertainment System",
   "item.television.name": "Television",
 
