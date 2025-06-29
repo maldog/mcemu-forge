@@ -2,11 +2,45 @@ package jp.tanakh.bjne.nes;
 
 import java.util.Arrays;
 
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+
 public class Ppu {
+
+
+
+
 	public Ppu(Nes n) {
 		nes = n;
 		initPalette();
 	}
+
+	public void writeVram(short addr, byte val) {
+		if (addr >= 0 && addr < vram.length) {
+			vram[addr] = val;
+		}
+	}
+
+	public void saveTo(DataOutputStream out) throws IOException {
+		out.write(sprram);
+		for (int i = 0; i < 4; i++) {
+			out.write(nameTable[i]);
+		}
+		out.write(palette);
+	}
+	public void loadFrom(DataInputStream in) throws IOException {
+		in.readFully(sprram);
+		for (int i = 0; i < 4; i++) {
+			in.readFully(nameTable[i]);
+		}
+		in.readFully(palette);
+		setMirroring(nes.getRom().isFourScreen() ? MirrorType.FOUR_SCREEN
+				: nes.getRom().mirror() == Rom.MirrorType.HORIZONTAL ? MirrorType.HOLIZONTAL
+				: nes.getRom().mirror() == Rom.MirrorType.VERTICAL ? MirrorType.VERTICAL
+				: MirrorType.FOUR_SCREEN);
+	}
+
 
 	public void reset() {
 		Arrays.fill(sprram, (byte) 0x00);
@@ -239,6 +273,8 @@ public class Ppu {
 		}
 	}
 
+
+
 	public void spriteCheck(int line) {
 		if (nes.getRegs().getSpriteVisible()) {
 			int spr_y = (sprram[0] & 0xff) + 1;
@@ -265,6 +301,7 @@ public class Ppu {
 		}
 	}
 
+	private byte[] vram = new byte[0x2000]; // 8KB of VRAM
 	private byte[] sprram = new byte[0x100];
 	private byte[][] nameTable = new byte[4][0x400];
 	private byte[][] namePage = new byte[4][];

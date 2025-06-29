@@ -20,4 +20,6 @@ public abstract class MapperAdapter implements Mapper {
 	public void write(short adr, byte dat) {
 	}
 
+
+
 }

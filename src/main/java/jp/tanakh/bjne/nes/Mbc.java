@@ -3,10 +3,26 @@ package jp.tanakh.bjne.nes;
 import java.util.Arrays;
 
 public class Mbc {
+
+	private byte[] chrRam = new byte[0x2000]; // 8KB CHR RAM
+
 	public Mbc(Nes n) {
 		nes = n;
 		rom = vrom = null;
 		isVram = false;
+	}
+
+	public byte[] getRam() {
+		return ram;
+	}
+
+	public byte[] getChrRam() {
+		return chrRam;
+	}
+
+	public void setChrRam(byte[] data) {
+		if (data.length == chrRam.length)
+			System.arraycopy(data, 0, chrRam, 0, chrRam.length);
 	}
 
 	public void reset() {

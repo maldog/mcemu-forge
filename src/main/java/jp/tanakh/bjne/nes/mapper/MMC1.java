@@ -4,11 +4,84 @@ import jp.tanakh.bjne.nes.MapperAdapter;
 import jp.tanakh.bjne.nes.Nes;
 import jp.tanakh.bjne.nes.Ppu;
 
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+
 public class MMC1 extends MapperAdapter {
 	public MMC1(Nes n) {
 		nes = n;
 		reset();
 	}
+
+
+
+	@Override
+	public void saveTo(DataOutputStream out) throws IOException {
+		out.writeInt(romSize);
+		out.writeInt(sizeInKB);
+		out.writeInt(cnt);
+		out.writeInt(buf);
+
+		out.writeBoolean(mirror);
+		out.writeBoolean(oneScreen);
+		out.writeBoolean(switchArea);
+		out.writeBoolean(switchSize);
+		out.writeBoolean(vromSwitchSize);
+
+		out.writeInt(swapBase);
+
+		out.writeInt(vromPage[0]);
+		out.writeInt(vromPage[1]);
+		out.writeInt(romPage[0]);
+		out.writeInt(romPage[1]);
+	}
+
+	@Override
+	public void loadFrom(DataInputStream in) throws IOException {
+		romSize = in.readInt();
+		sizeInKB = in.readInt();
+		cnt = in.readInt();
+		buf = in.readInt();
+
+		mirror = in.readBoolean();
+		oneScreen = in.readBoolean();
+		switchArea = in.readBoolean();
+		switchSize = in.readBoolean();
+		vromSwitchSize = in.readBoolean();
+
+		swapBase = in.readInt();
+
+		vromPage[0] = in.readInt();
+		vromPage[1] = in.readInt();
+		romPage[0] = in.readInt();
+		romPage[1] = in.readInt();
+
+		setMirroring();
+		setBank();
+
+		// Reapply VROM pages
+		if (vromSwitchSize) {
+			nes.getMbc().mapVrom(0, vromPage[0] * 4);
+			nes.getMbc().mapVrom(1, vromPage[0] * 4 + 1);
+			nes.getMbc().mapVrom(2, vromPage[0] * 4 + 2);
+			nes.getMbc().mapVrom(3, vromPage[0] * 4 + 3);
+			nes.getMbc().mapVrom(4, vromPage[1] * 4);
+			nes.getMbc().mapVrom(5, vromPage[1] * 4 + 1);
+			nes.getMbc().mapVrom(6, vromPage[1] * 4 + 2);
+			nes.getMbc().mapVrom(7, vromPage[1] * 4 + 3);
+		} else {
+			nes.getMbc().mapVrom(0, vromPage[0] * 4);
+			nes.getMbc().mapVrom(1, vromPage[0] * 4 + 1);
+			nes.getMbc().mapVrom(2, vromPage[0] * 4 + 2);
+			nes.getMbc().mapVrom(3, vromPage[0] * 4 + 3);
+			nes.getMbc().mapVrom(4, vromPage[0] * 4 + 4);
+			nes.getMbc().mapVrom(5, vromPage[0] * 4 + 5);
+			nes.getMbc().mapVrom(6, vromPage[0] * 4 + 6);
+			nes.getMbc().mapVrom(7, vromPage[0] * 4 + 7);
+		}
+	}
+
 
 	@Override
 	public int mapperNo() {

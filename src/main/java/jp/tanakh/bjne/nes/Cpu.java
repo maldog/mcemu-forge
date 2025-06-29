@@ -1057,9 +1057,9 @@ public class Cpu {
 		}
 	}
 
-	private byte regA, regX, regY, regS;
-	private short regPC;
-	private byte cFlag, zFlag, iFlag, dFlag, bFlag, vFlag, nFlag;
+	public byte regA, regX, regY, regS;
+	public short regPC;
+	public byte cFlag, zFlag, iFlag, dFlag, bFlag, vFlag, nFlag;
 
 	private short oprPC;
 

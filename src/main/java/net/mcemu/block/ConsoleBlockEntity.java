@@ -25,10 +25,15 @@ public class ConsoleBlockEntity extends BlockEntity {
 
     public void insertCartridge(Path romPath) {
         System.out.println("🎮 insertCartridge called with: " + romPath);
-        if (emulator != null) emulator.stop();
+
+        if (emulator != null) {
+            emulator.stop();  // stop old session before discarding it
+        }
+
         emulator = new MCEmu();
-        emulator.stop();
-        emulator.start(romPath); // this begins NES emulation
+        net.mcemu.MCEmuMod.setEmu(emulator);  // set global reference
+
+        emulator.start(romPath);  // 🎮 start new cart
     }
 
 

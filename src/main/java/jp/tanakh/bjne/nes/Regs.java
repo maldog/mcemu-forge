@@ -1,8 +1,63 @@
 package jp.tanakh.bjne.nes;
 
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+
 public class Regs {
 	public Regs(Nes n) {
 		nes = n;
+	}
+
+	public void saveTo(DataOutputStream out) throws IOException {
+		out.writeBoolean(nmiEnable);
+		out.writeBoolean(spriteSize);
+		out.writeBoolean(bgPatAdr);
+		out.writeBoolean(spritePatAdr);
+		out.writeBoolean(ppuAdrIncr);
+
+		out.writeBoolean(spriteVisible);
+		out.writeBoolean(bgVisible);
+		out.writeBoolean(spriteClip);
+		out.writeBoolean(bgClip);
+		out.writeBoolean(colorDisplay);
+
+		out.writeBoolean(isVBlank);
+		out.writeBoolean(sprite0Occur);
+		out.writeBoolean(spriteOver);
+		out.writeBoolean(vramWriteFlag);
+
+		out.writeByte(sprramAdr);
+		out.writeShort(ppuAdrT);
+		out.writeShort(ppuAdrV);
+		out.writeShort(ppuAdrX);
+		out.writeBoolean(ppuAdrToggle);
+		out.writeByte(ppuReadBuf);
+	}
+	public void loadFrom(DataInputStream in) throws IOException {
+		nmiEnable = in.readBoolean();
+		spriteSize = in.readBoolean();
+		bgPatAdr = in.readBoolean();
+		spritePatAdr = in.readBoolean();
+		ppuAdrIncr = in.readBoolean();
+
+		spriteVisible = in.readBoolean();
+		bgVisible = in.readBoolean();
+		spriteClip = in.readBoolean();
+		bgClip = in.readBoolean();
+		colorDisplay = in.readBoolean();
+
+		isVBlank = in.readBoolean();
+		sprite0Occur = in.readBoolean();
+		spriteOver = in.readBoolean();
+		vramWriteFlag = in.readBoolean();
+
+		sprramAdr = in.readByte();
+		ppuAdrT = in.readShort();
+		ppuAdrV = in.readShort();
+		ppuAdrX = in.readShort();
+		ppuAdrToggle = in.readBoolean();
+		ppuReadBuf = in.readByte();
 	}
 
 	public void reset() {

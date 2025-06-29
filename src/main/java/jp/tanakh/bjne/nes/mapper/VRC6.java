@@ -8,10 +8,63 @@ import jp.tanakh.bjne.nes.Nes;
 import jp.tanakh.bjne.nes.Ppu;
 import jp.tanakh.bjne.nes.Renderer.SoundInfo;
 
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+
 public class VRC6 extends MapperAdapter {
 	public VRC6(Nes n) {
 		nes = n;
 	}
+
+	@Override
+	public void saveTo(DataOutputStream out) throws IOException {
+		out.writeInt(irqLatch);
+		out.writeInt(irqCount);
+		out.writeInt(irqEnable);
+		out.writeLong(befClk);
+
+		for (SqState s : sq) {
+			out.writeInt(s.duty);
+			out.writeInt(s.volume);
+			out.writeBoolean(s.gate);
+			out.writeInt(s.freq);
+			out.writeBoolean(s.enable);
+			out.writeInt(s.step);
+			out.writeDouble(s.clk);
+		}
+
+		out.writeInt(saw.phase);
+		out.writeInt(saw.freq);
+		out.writeBoolean(saw.enable);
+		out.writeInt(saw.step);
+		out.writeDouble(saw.clk);
+	}
+
+	@Override
+	public void loadFrom(DataInputStream in) throws IOException {
+		irqLatch = in.readInt();
+		irqCount = in.readInt();
+		irqEnable = in.readInt();
+		befClk = in.readLong();
+
+		for (SqState s : sq) {
+			s.duty = in.readInt();
+			s.volume = in.readInt();
+			s.gate = in.readBoolean();
+			s.freq = in.readInt();
+			s.enable = in.readBoolean();
+			s.step = in.readInt();
+			s.clk = in.readDouble();
+		}
+
+		saw.phase = in.readInt();
+		saw.freq = in.readInt();
+		saw.enable = in.readBoolean();
+		saw.step = in.readInt();
+		saw.clk = in.readDouble();
+	}
+
 
 	@Override
 	public int mapperNo() {

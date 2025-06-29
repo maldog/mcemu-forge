@@ -48,9 +48,25 @@ public class MCEmuMod {
     public static final KeyMapping P2NES_START   = new KeyMapping("key.mcemu.p2_start",   GLFW.GLFW_KEY_UNKNOWN, KEY_CATEGORY);
     public static final KeyMapping P2NES_SELECT  = new KeyMapping("key.mcemu.p2_select",  GLFW.GLFW_KEY_UNKNOWN, KEY_CATEGORY);
 
+    //For save state
+    public static final KeyMapping SAVE_STATE_KEY = new KeyMapping("key.mcemu.save_state", GLFW.GLFW_KEY_UNKNOWN, KEY_CATEGORY);
+    public static final KeyMapping LOAD_STATE_KEY = new KeyMapping("key.mcemu.load_state", GLFW.GLFW_KEY_UNKNOWN, KEY_CATEGORY);
+
+    private static net.mcemu.model.MCEmu activeEmu;
+
+    public static net.mcemu.model.MCEmu getEmu() {
+        return activeEmu;
+    }
+
+    public static void setEmu(net.mcemu.model.MCEmu emu) {
+        activeEmu = emu;
+    }
+
+
     public static final KeyMapping[][] keyDef = {
             { P1NES_A, P1NES_B, P1NES_SELECT, P1NES_START, P1NES_UP, P1NES_DOWN, P1NES_LEFT, P1NES_RIGHT },
-            { P2NES_A, P2NES_B, P2NES_SELECT, P2NES_START, P2NES_UP, P2NES_DOWN, P2NES_LEFT, P2NES_RIGHT }
+            { P2NES_A, P2NES_B, P2NES_SELECT, P2NES_START, P2NES_UP, P2NES_DOWN, P2NES_LEFT, P2NES_RIGHT },
+            { SAVE_STATE_KEY, LOAD_STATE_KEY } // New row
     };
 
     public MCEmuMod() {
@@ -74,28 +90,6 @@ public class MCEmuMod {
     }
 
 
-/*
-    @Mod.EventBusSubscriber(modid = MCEmuMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public class ClientModEvents {
-
-        @SubscribeEvent
-        public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
-            for (KeyMapping[] row : MCEmuMod.keyDef) {
-                for (KeyMapping key : row) {
-                    event.register(key);
-                }
-            }
-        }
-
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-            event.enqueueWork(() -> {
-                ItemBlockRenderTypes.setRenderLayer(ModRegistry.TELEVISION_BLOCK.get(), RenderType.translucent());
-            });
-        }
-    }
-    */
-
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
@@ -105,9 +99,23 @@ public class MCEmuMod {
             for (int j = 0; j < keyDef[i].length; j++) {
                 KeyMapping key = keyDef[i][j];
                 if (key != null && key.isDown()) {
-                    // handle key press
+                    // Handle NES input here if needed
                 }
             }
         }
+
+        // Save/load handling
+        if (SAVE_STATE_KEY.consumeClick()) {
+            if (getEmu() != null) {
+                getEmu().saveStateToDisk(0);
+            }
+        }
+
+        if (LOAD_STATE_KEY.consumeClick()) {
+            if (getEmu() != null) {
+                getEmu().loadStateFromDisk(0);
+            }
+        }
     }
+
 }

@@ -4,6 +4,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+
 import jp.tanakh.bjne.nes.Renderer.SoundInfo;
 
 public class Apu {
@@ -316,6 +320,104 @@ public class Apu {
 
 	final static int dacTable[] = { 0xD60, 0xBE0, 0xAA0, 0xA00, 0x8F0, 0x7F0, 0x710, 0x6B0, 0x5F0, 0x500, 0x470, 0x400, 0x350, 0x2A0, 0x240, 0x1B0, };
 
+	public void saveTo(DataOutputStream out) throws IOException {
+		// Save APU timing state
+		out.writeLong(befClock);
+		out.writeLong(befSync);
+
+		// Save DMC state
+		out.writeBoolean(dmc.enable);
+		out.writeBoolean(dmc.irq);
+		out.writeInt(dmc.playbackMode);
+		out.writeInt(dmc.waveLength);
+		out.writeDouble(dmc.clk);
+		out.writeInt(dmc.counter);
+		out.writeInt(dmc.length);
+		out.writeInt(dmc.lengthLatch);
+		out.writeShort(dmc.adr);
+		out.writeShort(dmc.adrLatch);
+		out.writeInt(dmc.shiftReg);
+		out.writeInt(dmc.shiftCount);
+		out.writeInt(dmc.dacLsb);
+
+		// Save channel state for each of the 4 channels
+		for (int i = 0; i < 4; i++) {
+			ChState cc = ch[i];
+			out.writeBoolean(cc.enable);
+			out.writeInt(cc.waveLength);
+			out.writeBoolean(cc.lengthEnable);
+			out.writeInt(cc.length);
+			out.writeDouble(cc.lengthClk);
+			out.writeInt(cc.volume);
+			out.writeInt(cc.envelopeRate);
+			out.writeBoolean(cc.envelopeEnable);
+			out.writeDouble(cc.envelopeClk);
+			out.writeBoolean(cc.sweepEnable);
+			out.writeInt(cc.sweepRate);
+			out.writeBoolean(cc.sweepMode);
+			out.writeInt(cc.sweepShift);
+			out.writeDouble(cc.sweepClk);
+			out.writeBoolean(cc.sweepPausing);
+			out.writeInt(cc.duty);
+			out.writeInt(cc.linearLatch);
+			out.writeInt(cc.linearCounter);
+			out.writeBoolean(cc.holdnote);
+			out.writeInt(cc.counterStart);
+			out.writeDouble(cc.linearClk);
+			out.writeBoolean(cc.randomType);
+			out.writeInt(cc.step);
+			out.writeDouble(cc.stepClk);
+			out.writeInt(cc.shiftRegister);
+		}
+	}
+
+	public void loadFrom(DataInputStream in) throws IOException {
+		befClock = in.readLong();
+		befSync = in.readLong();
+
+		dmc.enable = in.readBoolean();
+		dmc.irq = in.readBoolean();
+		dmc.playbackMode = in.readInt();
+		dmc.waveLength = in.readInt();
+		dmc.clk = in.readDouble();
+		dmc.counter = in.readInt();
+		dmc.length = in.readInt();
+		dmc.lengthLatch = in.readInt();
+		dmc.adr = in.readShort();
+		dmc.adrLatch = in.readShort();
+		dmc.shiftReg = in.readInt();
+		dmc.shiftCount = in.readInt();
+		dmc.dacLsb = in.readInt();
+
+		for (int i = 0; i < 4; i++) {
+			ChState cc = ch[i];
+			cc.enable = in.readBoolean();
+			cc.waveLength = in.readInt();
+			cc.lengthEnable = in.readBoolean();
+			cc.length = in.readInt();
+			cc.lengthClk = in.readDouble();
+			cc.volume = in.readInt();
+			cc.envelopeRate = in.readInt();
+			cc.envelopeEnable = in.readBoolean();
+			cc.envelopeClk = in.readDouble();
+			cc.sweepEnable = in.readBoolean();
+			cc.sweepRate = in.readInt();
+			cc.sweepMode = in.readBoolean();
+			cc.sweepShift = in.readInt();
+			cc.sweepClk = in.readDouble();
+			cc.sweepPausing = in.readBoolean();
+			cc.duty = in.readInt();
+			cc.linearLatch = in.readInt();
+			cc.linearCounter = in.readInt();
+			cc.holdnote = in.readBoolean();
+			cc.counterStart = in.readInt();
+			cc.linearClk = in.readDouble();
+			cc.randomType = in.readBoolean();
+			cc.step = in.readInt();
+			cc.stepClk = in.readDouble();
+			cc.shiftRegister = in.readInt();
+		}
+	}
 	void doWrite(ChState[] ch, DmcState dmc, short adr, byte bdat) {
 		int cn = (adr & 0x1f) / 4;
 		ChState cc = null;

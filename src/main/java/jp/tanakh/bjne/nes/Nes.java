@@ -1,5 +1,12 @@
+
 package jp.tanakh.bjne.nes;
 
+import java.io.IOException;
+
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 public class Nes {
@@ -35,12 +42,100 @@ public class Nes {
 	}
 
 	public void saveState(String fname) {
-		// TODO
+		try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fname))) {
+			// Write 4-byte header and 1-byte version
+			out.writeBytes("MCES"); // 4-byte magic
+			out.writeByte(1);       // version 1 (1 byte)
+
+			out.writeShort(cpu.regPC);
+			out.writeByte(cpu.regA);
+			out.writeByte(cpu.regX);
+			out.writeByte(cpu.regY);
+			out.writeByte(cpu.regS);
+
+			out.writeByte(cpu.cFlag);
+			out.writeByte(cpu.zFlag);
+			out.writeByte(cpu.iFlag);
+			out.writeByte(cpu.dFlag);
+			out.writeByte(cpu.bFlag);
+			out.writeByte(cpu.vFlag);
+			out.writeByte(cpu.nFlag);
+
+			out.write(mbc.getRam());
+
+			apu.saveTo(out);
+			ppu.saveTo(out);
+			regs.saveTo(out);
+
+			if (mapper != null) {
+				mapper.saveTo(out);
+			}
+
+			System.out.println("✅ Saved emulator state to " + fname);
+		} catch (IOException e) {
+			System.err.println("❌ Failed to save state to " + fname);
+			e.printStackTrace();
+		}
 	}
 
+
+
 	public void loadState(String fname) {
-		// TODO
+		try (DataInputStream in = new DataInputStream(new FileInputStream(fname))) {
+			// Read 4-byte magic
+			byte[] magic = new byte[4];
+			in.readFully(magic);
+			if (!new String(magic).equals("MCES")) {
+				throw new IOException("Invalid savestate header");
+			}
+
+			int version = in.readUnsignedByte(); // read 1 byte
+			if (version != 1) {
+				throw new IOException("Unsupported savestate version: " + version);
+			}
+
+			cpu.regPC = (short) in.readUnsignedShort();
+			cpu.regA = in.readByte();
+			cpu.regX = in.readByte();
+			cpu.regY = in.readByte();
+			cpu.regS = in.readByte();
+
+			cpu.cFlag = in.readByte();
+			cpu.zFlag = in.readByte();
+			cpu.iFlag = in.readByte();
+			cpu.dFlag = in.readByte();
+			cpu.bFlag = in.readByte();
+			cpu.vFlag = in.readByte();
+			cpu.nFlag = in.readByte();
+
+			in.readFully(mbc.getRam());
+
+			apu.loadFrom(in);
+			ppu.loadFrom(in);
+			regs.loadFrom(in);
+
+			if (mapper != null) {
+				mapper.loadFrom(in);
+			}
+
+			int op = mbc.read(cpu.regPC) & 0xFF;
+			System.out.printf("🧠 Resume at PC=$%04X, opcode=$%02X\n", cpu.regPC & 0xFFFF, op);
+			if (op == 0x02 || op == 0x4F || op == 0xFF) {
+				System.out.println("🚨 WARNING: CPU will execute invalid opcode!");
+			}
+
+			int pc = cpu.regPC & 0xFFFF;
+			if (pc < 0x8000 || pc > 0xFFFF) {
+				System.out.printf("🚨 PC out of range after load: $%04X\n", pc);
+				cpu.regPC = (short) 0x8000;
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
+
+
 
 	public void reset() {
 		// reset rom & mbc first
@@ -134,12 +229,12 @@ public class Nes {
 		return regs;
 	}
 
-	public Mapper getMapper() {
-		return mapper;
-	}
-
 	public Renderer getRenderer() {
 		return renderer;
+	}
+
+	public Mapper getMapper() {
+		return mapper;
 	}
 
 	private Rom rom;

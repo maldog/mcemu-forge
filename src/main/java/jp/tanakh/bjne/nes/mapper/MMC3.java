@@ -4,6 +4,9 @@ import jp.tanakh.bjne.nes.MapperAdapter;
 import jp.tanakh.bjne.nes.Nes;
 import jp.tanakh.bjne.nes.Ppu;
 
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 /**
  * Mapper 4: MMC3
  */
@@ -11,6 +14,58 @@ public class MMC3 extends MapperAdapter {
 	public MMC3(Nes n) {
 		nes = n;
 	}
+
+	@Override
+	public void saveTo(DataOutputStream out) throws IOException {
+		romSize = nes.getRom().romSize(); // ✅ ensure it's set
+		out.writeInt(romSize);
+		out.writeInt(cmd);
+		out.writeBoolean(prgSwap);
+		out.writeBoolean(chrSwap);
+		out.writeInt(irqCounter);
+		out.writeInt(irqLatch);
+		out.writeBoolean(irqEnable);
+		for (int i = 0; i < 2; i++) out.writeInt(prgPage[i]);
+		for (int i = 0; i < 8; i++) out.writeInt(chrPage[i]);
+	}
+
+	@Override
+	public void loadFrom(DataInputStream in) throws IOException {
+		romSize = in.readInt();
+
+		if (romSize <= 0 || romSize > 1024) {
+			System.out.println("❌ Invalid romSize loaded: " + romSize);
+			romSize = 1;  // fallback to prevent crash
+		}
+
+		cmd = in.readInt();
+		prgSwap = in.readBoolean();
+		chrSwap = in.readBoolean();
+		irqCounter = in.readInt();
+		irqLatch = in.readInt();
+		irqEnable = in.readBoolean();
+
+		for (int i = 0; i < 2; i++) {
+			prgPage[i] = in.readInt();
+			if (prgPage[i] < 0 || prgPage[i] >= romSize * 2) {
+				System.out.println("⚠️ Clamping invalid prgPage[" + i + "] from " + prgPage[i]);
+				prgPage[i] = 0;
+			}
+		}
+		for (int i = 0; i < 8; i++) {
+			chrPage[i] = in.readInt();
+			if (chrPage[i] < 0) chrPage[i] = 0;
+		}
+
+		setRom();
+		setVrom();
+
+		System.out.printf("✅ MMC3 restored: PC=$%04X, PRG=[%d,%d], CMD=%d\n",
+				nes.getCpu().regPC & 0xFFFF, prgPage[0], prgPage[1], cmd);
+	}
+
+
+
 
 	@Override
 	public int mapperNo() {
@@ -133,18 +188,31 @@ public class MMC3 extends MapperAdapter {
 	}
 
 	private void setRom() {
-		if (prgSwap) {
-			nes.getMbc().mapRom(0, (romSize - 1) * 2);
-			nes.getMbc().mapRom(1, prgPage[1]);
-			nes.getMbc().mapRom(2, prgPage[0]);
-			nes.getMbc().mapRom(3, (romSize - 1) * 2 + 1);
-		} else {
-			nes.getMbc().mapRom(0, prgPage[0]);
-			nes.getMbc().mapRom(1, prgPage[1]);
-			nes.getMbc().mapRom(2, (romSize - 1) * 2);
-			nes.getMbc().mapRom(3, (romSize - 1) * 2 + 1);
+		if (romSize <= 0) {
+			System.out.println("setRom() called with invalid romSize=" + romSize);
+			return;
 		}
+		int rom0, rom1, rom2, rom3;
+		if (prgSwap) {
+			rom0 = (romSize - 1) * 2;
+			rom1 = prgPage[1];
+			rom2 = prgPage[0];
+			rom3 = (romSize - 1) * 2 + 1;
+		} else {
+			rom0 = prgPage[0];
+			rom1 = prgPage[1];
+			rom2 = (romSize - 1) * 2;
+			rom3 = (romSize - 1) * 2 + 1;
+		}
+
+		System.out.printf("🧩 setRom() PRG=[%d %d %d %d]\n", rom0, rom1, rom2, rom3);
+
+		nes.getMbc().mapRom(0, rom0);
+		nes.getMbc().mapRom(1, rom1);
+		nes.getMbc().mapRom(2, rom2);
+		nes.getMbc().mapRom(3, rom3);
 	}
+
 
 	private void setVrom() {
 		for (int i = 0; i < 8; i++)
